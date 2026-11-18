@@ -1,0 +1,15 @@
+# Quick syntax check of the web app scripts (Linux runner).
+name: Web check
+
+on:
+  push:
+    paths: ["AeroCallout TAS/**", "ios/AeroCallout/bridge.js", ".github/workflows/web-check.yml"]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: for f in "AeroCallout TAS"/js/*.js ios/AeroCallout/bridge.js; do node --check "$f" || exit 1; done
