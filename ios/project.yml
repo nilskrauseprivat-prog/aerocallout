@@ -1,0 +1,34 @@
+# XcodeGen project description (the Xcode project is generated from this file in the cloud build, see
+# .github/workflows/ios.yml). Build without a Mac: push to GitHub, download the IPA from the Actions run,
+# install it with Sideloadly.
+name: AeroCallout
+options:
+  bundleIdPrefix: org.aerocallout
+  deploymentTarget:
+    iOS: "15.0"
+settings:
+  base:
+    MARKETING_VERSION: "0.3"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+targets:
+  AeroCallout:
+    type: application
+    platform: iOS
+    sources:
+      - path: AeroCallout
+        excludes:
+          - "www/**"
+      - path: AeroCallout/www
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.aerocallout.ios
+        INFOPLIST_FILE: AeroCallout/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGN_IDENTITY: ""

@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'org.aerocallout.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'org.aerocallout.app'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '0.3.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // The web app (display, logic, simulator) is packaged from the shared folder "AeroCallout TAS".
+    sourceSets {
+        main {
+            assets.srcDirs += "$buildDir/generated/webassets"
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'androidx.car.app:app:1.4.0'      // Android Auto (Car App Library)
+}
+
+def webSrc = file("$rootDir/../AeroCallout TAS")
+
+tasks.register('copyWebAssets', Copy) {
+    from(webSrc) {
+        include 'index.html', 'icon.svg', 'manifest.webmanifest', 'css/**', 'js/**'
+    }
+    into "$buildDir/generated/webassets/www"
+}
+
+preBuild.dependsOn copyWebAssets

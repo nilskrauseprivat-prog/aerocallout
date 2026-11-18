@@ -1,0 +1,329 @@
+:root {
+  --bg: #0b0d10;
+  --panel: #14181d;
+  --line: #262c34;
+  --text: #d8dee6;
+  --muted: #8a919c;
+  --cyan: #00e5ff;
+  --amber: #ffb000;
+  --red: #ff2b2b;
+  --green: #2bff4a;
+  --bezel: #2a2d31;
+  --bezel-hi: #3a3e44;
+  --mono: "Consolas", "Lucida Console", "Menlo", monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.4 "Segoe UI", system-ui, sans-serif; }
+button { font: inherit; cursor: pointer; }
+
+#app { display: flex; gap: 18px; padding: 16px; min-height: 100%; align-items: flex-start; }
+#unit { flex: 0 0 auto; }
+#panel { flex: 1 1 420px; min-width: 320px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; max-height: calc(100vh - 32px); overflow: auto; }
+
+/* ---------- bezel ---------- */
+.bezel {
+  background: linear-gradient(160deg, var(--bezel-hi), var(--bezel) 40%, #1d2023);
+  border-radius: 18px; padding: 10px 12px 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.4);
+  border: 1px solid #111;
+}
+.brand { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px 8px; color: #b9bec5; font: bold 12px var(--mono); letter-spacing: 2px; }
+.brand .model { font-weight: normal; font-size: 10px; color: #7b8088; letter-spacing: 1px; }
+.bezel-row { display: flex; gap: 10px; align-items: stretch; }
+.screen {
+  width: min(68vh, calc(100vw - 600px), 640px); min-width: 300px; aspect-ratio: 1 / 1;
+  background: #000; border-radius: 6px; padding: 0; overflow: hidden;
+  box-shadow: inset 0 0 0 3px #050505, inset 0 0 18px rgba(0,0,0,.9), 0 0 0 2px #0e0f11;
+}
+.screen canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
+.keys { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+.keys.bottom { flex-direction: row; justify-content: center; margin-top: 12px; gap: 14px; }
+/* Softkeys: larger, colour-coded by function group, each with its own icon. */
+.sk {
+  --c: #c9d1da;                     /* group colour (icon, top cap, active glow) */
+  width: 88px; min-height: 74px; padding: 6px 3px 5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font: bold 13px/1.1 var(--mono); color: #eef2f5; letter-spacing: .5px;
+  background: linear-gradient(#50565e, #2e3238 70%, #26292e);
+  border: 1px solid #0d0e10; border-top: 4px solid var(--c); border-radius: 9px;
+  box-shadow: 0 3px 0 #0b0c0e, 0 4px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14);
+  text-shadow: 0 0 4px rgba(255,255,255,.12);
+  position: relative;
+}
+.sk svg { width: 24px; height: 24px; fill: none; stroke: var(--c); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sk b { font-weight: bold; }
+.sk small { font: 11px/1.1 "Segoe UI", system-ui, sans-serif; color: #b4bcc6; letter-spacing: 0; text-shadow: none; }
+.sk:hover { filter: brightness(1.12); border-color: #0d0e10; border-top-color: var(--c); }
+.sk:active { transform: translateY(2px); box-shadow: 0 1px 0 #0b0c0e, inset 0 1px 0 rgba(255,255,255,.1); }
+.sk.on { box-shadow: 0 3px 0 #0b0c0e, 0 0 12px color-mix(in srgb, var(--c) 55%, transparent), inset 0 0 10px color-mix(in srgb, var(--c) 25%, transparent); }
+.sk.on small { color: var(--c); font-weight: 600; }
+.sk.warn small { color: var(--amber); font-weight: 600; }
+.sk.warn { box-shadow: 0 3px 0 #0b0c0e, 0 0 12px rgba(255,176,0,.55); }
+
+.grp-rng   { --c: #3fd7ff; }   /* display / range: cyan */
+.grp-tfc   { --c: #ffb000; }   /* traffic: amber */
+.grp-wx    { --c: #2bdc4a; }   /* weather: green */
+.grp-terr  { --c: #d9893a; }   /* terrain: earth */
+.grp-sys   { --c: #e9edf2; }   /* system: white */
+.grp-audio { --c: #6aa8ff; }   /* audio: blue */
+.grp-sim   { --c: #ff5cf0; }   /* simulation: magenta */
+.grp-inhb  { --c: #ffd400; }   /* guarded function: yellow/black */
+.sk.grp-inhb { background: repeating-linear-gradient(-45deg, #3a3510 0 7px, #2a2b2e 7px 14px); }
+
+/* Rocker pairs (RNG ▲/▼, GAIN ▲/▼): joined like a rocker switch */
+.rocker { display: flex; flex-direction: column; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,.45); }
+.rocker .sk { box-shadow: 0 2px 0 #0b0c0e, inset 0 1px 0 rgba(255,255,255,.14); }
+.rocker .sk:first-child { border-radius: 10px 10px 2px 2px; }
+.rocker .sk:last-child { border-radius: 2px 2px 10px 10px; border-top: 1px solid #0d0e10; margin-top: 1px; }
+
+.keys.bottom .sk { width: 100px; min-height: 66px; }
+/* Power: round key with status LED */
+.sk.pwr { --c: #ff4d4d; width: 74px !important; min-height: 74px !important; border-radius: 50%; border-top-width: 1px; border: 3px solid #5a1a1a; }
+.sk.pwr .led { position: absolute; top: 7px; right: 14px; }
+.sk.pwr:has(.led.on) { --c: #2bff4a; border-color: #1e5a26; }
+
+/* ---------- screen alert glow (red warnings only) ---------- */
+.screen.alert-red { box-shadow: inset 0 0 0 3px #050505, 0 0 0 3px #ff1f1f, 0 0 28px rgba(255,0,0,.85); animation: glowRed .6s ease-in-out infinite alternate; }
+@keyframes glowRed { from { box-shadow: inset 0 0 0 3px #050505, 0 0 0 3px #ff1f1f, 0 0 10px rgba(255,0,0,.5); } to { box-shadow: inset 0 0 0 3px #050505, 0 0 0 4px #ff1f1f, 0 0 34px rgba(255,0,0,.95); } }
+
+/* ---------- options menu (on-screen) ---------- */
+.screen { position: relative; }
+.menu {
+  position: absolute; inset: 0; background: rgba(0, 0, 0, .94);
+  display: flex; flex-direction: column; font-family: var(--mono); color: #e9edf2;
+  border: 2px solid var(--cyan); border-radius: 6px;
+}
+.menu.hidden { display: none; }
+.menu-head { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #1f6f7a; color: var(--cyan); font-weight: bold; letter-spacing: 2px; }
+.menu-head button { background: #102a2e; border-color: var(--cyan); color: var(--cyan); font: bold 12px var(--mono); }
+.menu-body { overflow: auto; padding: 4px 12px 12px; }
+.menu h4 { color: var(--green); margin: 12px 0 6px; font-size: 12px; letter-spacing: 2px; border-bottom: 1px dashed #234; padding-bottom: 3px; }
+.seg-row { display: flex; align-items: center; gap: 10px; margin: 5px 0; }
+.seg-row > span { width: 34%; font-size: 12px; color: #c9d1da; }
+.seg-row input[type=range] { flex: 1; }
+.seg { display: flex; flex-wrap: wrap; gap: 0; }
+.seg button { border-radius: 0; margin-left: -1px; padding: 5px 10px; font: bold 12px var(--mono); background: #151a20; color: #9aa4b0; border: 1px solid #3a4450; }
+.seg button:first-child { border-radius: 5px 0 0 5px; margin-left: 0; }
+.seg button:last-child { border-radius: 0 5px 5px 0; }
+.seg button.active { background: #0f3a20; color: var(--green); border-color: var(--green); position: relative; z-index: 1; }
+.testbtn { background: #2a2414; border-color: var(--amber); color: var(--amber); font: bold 12px var(--mono); }
+.audio-result { font-size: 12px; margin: 4px 0; min-height: 1em; color: var(--muted); font-family: "Segoe UI", system-ui, sans-serif; }
+.audio-result.ok { color: var(--green); }
+.audio-result.bad { color: var(--amber); }
+details { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; }
+details summary { cursor: pointer; color: var(--cyan); }
+.log em { color: var(--amber); font-style: normal; }
+.led { width: 8px; height: 8px; border-radius: 50%; background: #3a1010; box-shadow: inset 0 0 2px #000; display: inline-block; }
+.led.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.hint { color: var(--muted); font-size: 12px; text-align: center; margin: 8px 0 0; }
+
+/* ---------- panel ---------- */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+.tabs button { background: none; border: 0; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid transparent; }
+.tabs button.active { color: var(--text); border-bottom-color: var(--cyan); }
+.tab { display: none; }
+.tab.active { display: block; }
+h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 14px 0 6px; }
+.small { font-size: 12px; color: var(--muted); }
+
+table.t { width: 100%; border-collapse: collapse; font: 12px var(--mono); }
+table.t td, table.t th { padding: 3px 6px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+table.t td:last-child { white-space: normal; }
+table.t th { color: var(--muted); font-weight: normal; }
+td.ok { color: var(--green); }
+td.bad { color: var(--amber); }
+tr.lv-ta td { color: var(--amber); }
+tr.lv-warn td { color: var(--red); font-weight: bold; }
+tr.lv-prox td { color: var(--cyan); }
+.log { font: 12px var(--mono); max-height: 220px; overflow: auto; }
+.log div { padding: 2px 0; border-bottom: 1px dashed var(--line); }
+.log span { color: var(--muted); margin-right: 6px; }
+.log .lv-warn, .log .lv-warning { color: var(--red); }
+.log .lv-ta, .log .lv-caution { color: var(--amber); }
+.log .lv-info, .log .lv-test { color: var(--cyan); }
+
+fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 10px; }
+legend { color: var(--cyan); padding: 0 6px; font-weight: 600; }
+fieldset label { display: block; margin: 6px 0; }
+fieldset select, fieldset input[type=text], fieldset input[type=number] {
+  display: block; width: 100%; margin-top: 3px; padding: 5px 7px;
+  background: #0d1014; color: var(--text); border: 1px solid var(--line); border-radius: 5px;
+}
+fieldset input[type=range] { display: block; width: 100%; }
+button { background: #222831; color: var(--text); border: 1px solid #333b45; border-radius: 6px; padding: 6px 10px; }
+button:hover { border-color: var(--cyan); }
+button.wide { width: 100%; margin-top: 8px; }
+button.danger { color: var(--amber); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+.row select { margin-left: 6px; background: #0d1014; color: var(--text); border: 1px solid var(--line); border-radius: 5px; padding: 4px; }
+
+.simctl { display: grid; gap: 6px; margin: 10px 0; }
+.simctl div { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.simctl span { width: 70px; color: var(--muted); }
+.simctl b { width: 90px; font-family: var(--mono); color: var(--green); }
+.autopilot { color: var(--cyan); font: 13px var(--mono); min-height: 1.2em; margin: 6px 0; }
+.autopilot:empty { display: none; }
+.scenarios { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.scenarios button { text-align: left; display: flex; flex-direction: column; gap: 2px; }
+.scenarios button span { font-size: 11px; color: var(--muted); }
+.scenarios button.active { border-color: var(--amber); background: #2a2414; }
+
+.legend { list-style: none; padding: 0; }
+.legend li { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.sym { width: 14px; height: 14px; display: inline-block; flex: 0 0 14px; }
+.sym.other { border: 2px solid var(--cyan); transform: rotate(45deg) scale(.8); }
+.sym.prox { background: var(--cyan); transform: rotate(45deg) scale(.8); }
+.sym.ta { background: var(--amber); border-radius: 50%; }
+.sym.warn { background: var(--red); }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: flex; align-items: center; justify-content: center; z-index: 10; }
+.modal.hidden { display: none; }
+.modal-box { max-width: 560px; background: var(--panel); border: 1px solid var(--amber); border-radius: 10px; padding: 18px 22px; }
+.modal-box h2 { color: var(--amber); margin-top: 0; font-size: 18px; }
+.modal-box button { margin-top: 10px; border-color: var(--amber); }
+
+@media (max-width: 900px) {
+  #app { flex-direction: column; padding: 8px; align-items: stretch; }
+  #unit { align-self: center; }
+  .screen { width: min(78vw, 70vh); }
+  .sk { width: 62px; min-height: 60px; font-size: 11px; }
+  .sk svg { width: 18px; height: 18px; }
+  .sk small { font-size: 9px; }
+  .keys.bottom .sk { width: 66px; min-height: 56px; }
+  .sk.pwr { width: 60px !important; min-height: 60px !important; }
+  #panel { max-height: none; }
+  body:not(.ui-l2) #panel { display: none; }   /* panel only when expanded (2nd level) */
+}
+
+/* Control levels: ui-l0 = only essential keys (RNG, SENS, TERR, TON), ui-l1 = all radar keys, ui-l2 = + panel. */
+.ui-handle { display: flex; gap: 6px; margin-top: 8px; }
+.ui-handle button {
+  flex: 1; padding: 7px 8px; font: 600 12px "Segoe UI", system-ui, sans-serif; color: #b9c2cc;
+  background: linear-gradient(#262a30, #1b1e22); border: 1px solid #343a42; border-radius: 8px;
+}
+.ui-handle button:active { transform: translateY(1px); }
+@media (min-width: 901px) { #hPanel { display: none; } }   /* desktop: panel is always beside the display */
+body.ui-l0 .sk:not(.ess),
+body.ui-l0 .rocker:not(.ess),
+body.ui-l0 .brand,
+body.ui-l0 .hint { display: none; }
+body.ui-l0 .screen { width: min(86vh, calc(100vw - 480px), 820px); }
+body.ui-l0 .keys.left, body.ui-l0 .keys.right { justify-content: center; gap: 14px; }
+
+/* Phones in portrait (e.g. Pixel 4a, 393 px): display full width, key columns become rows below it. */
+@media (max-width: 600px) {
+  #app { padding: 4px; gap: 10px; }
+  #unit { width: 100%; }
+  .bezel { padding: 8px 6px 10px; border-radius: 14px; }
+  .brand { padding: 0 4px 6px; font-size: 11px; }
+  .brand .model { display: none; }
+  .bezel-row { flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .screen { order: 0; width: 100%; min-width: 0; }
+  .keys.left, .keys.right { order: 1; flex-direction: row; width: 100%; justify-content: space-between; gap: 4px; }
+  .keys.right { order: 2; }
+  .rocker { flex-direction: row; }
+  .rocker .sk:first-child { border-radius: 9px 2px 2px 9px; }
+  .rocker .sk:last-child { border-radius: 2px 9px 9px 2px; border-top: 4px solid var(--c); margin-top: 0; margin-left: 1px; }
+  .sk { width: calc((100vw - 60px) / 6); min-width: 48px; min-height: 58px; padding: 4px 1px; font-size: 10px; letter-spacing: 0; }
+  .sk svg { width: 16px; height: 16px; }
+  .sk small { font-size: 9px; }
+  .keys.bottom { gap: 6px; margin-top: 8px; }
+  .keys.bottom .sk { width: calc((100vw - 70px) / 5); min-height: 56px; }
+  .sk.pwr { width: 56px !important; min-height: 56px !important; }
+  .hint { font-size: 11px; }
+  #panel { min-width: 0; padding: 8px; }
+  .scenarios { grid-template-columns: 1fr; }
+  .seg button { padding: 5px 7px; font-size: 11px; }
+  .seg-row > span { width: 30%; font-size: 11px; }
+
+  /* idle on phones: tall radar display, the 5 essential keys in one row below it */
+  body.ui-l0 #app { padding: 0; }
+  body.ui-l0 .bezel { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; padding: 4px; border-radius: 0; }
+  body.ui-l0 .bezel-row, body.ui-l0 .keys { display: contents; }
+  body.ui-l0 .screen { order: 0; flex: 0 0 100%; width: 100%; aspect-ratio: auto; height: calc(100vh - 126px); height: calc(100dvh - 126px); }
+  body.ui-l0 .rocker.ess, body.ui-l0 .sk.ess { order: 1; }
+  /* level 1/2 on phones: display uses the height left over by the three key rows */
+  body.ui-l1 .screen, body.ui-l2 .screen { aspect-ratio: auto; height: calc(100vh - 330px); height: calc(100dvh - 330px); min-height: 300px; }
+  .ui-handle { margin: 4px 4px 0; }
+  body.ui-l0 .ui-handle { margin-top: 2px; }
+  body.ui-l0 .sk.ess { width: calc((100vw - 32px) / 5); min-height: 66px; }
+  body.ui-l0 .rocker.ess { flex-direction: row; }
+}
+
+/* ---------------------------------------------------------------- remote control (Android Auto connected) */
+#remote { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom)); gap: 12px; box-sizing: border-box; overflow: auto; }
+#remote.hidden { display: none; }
+body.remote #app { display: none; }
+.rm-head { display: flex; flex-direction: column; align-items: center; font: bold 15px/1.3 var(--mono); color: #eef2f5; letter-spacing: 2px; }
+.rm-head span { font: 12px/1.3 "Segoe UI", system-ui, sans-serif; color: #8a919c; letter-spacing: 0; }
+.rm-status { font: bold 15px/1.5 var(--mono); color: #3fd7ff; text-align: center; background: #000; border: 1px solid #2a2f37;
+  border-radius: 10px; padding: 10px; }
+.rm-status .g { color: #2bff4a; } .rm-status .a { color: #ffb000; } .rm-status .r { color: #ff2b2b; } .rm-status .w { color: #eef2f5; }
+.rm-alert { min-height: 0; text-align: center; font: bold 22px/1.3 var(--mono); }
+.rm-alert.ta { color: #ffb000; border: 2px solid #ffb000; border-radius: 10px; padding: 8px; }
+.rm-alert.warn { color: #000; background: #ff2b2b; border-radius: 10px; padding: 8px; }
+.rm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; align-content: start; }
+.rm-grid .sk { width: auto; min-height: 96px; font-size: 20px; }
+.rm-grid .sk small { font-size: 14px; }
+.rm-exit { background: none; border: 1px solid #3a4048; color: #b4bcc6; border-radius: 10px; padding: 12px; font: 14px "Segoe UI", system-ui, sans-serif; }
+body #remote .sk { display: flex !important; }   /* not affected by the compact key level of the radar view */
+.rm-sim { background: #121519; border: 1px solid #2a2f37; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.rm-sim-head { display: flex; align-items: center; justify-content: space-between; font: bold 14px var(--mono); color: #ff5cf0; letter-spacing: 1px; }
+.rm-sim-head .sk { min-height: 52px !important; width: 110px !important; font-size: 15px; }
+.rm-scen { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rm-scen button { background: linear-gradient(#3a3f46, #262a2f); color: #eef2f5; border: 1px solid #0d0e10; border-left: 4px solid #ff5cf0;
+  border-radius: 8px; padding: 10px 8px; font: 13px/1.25 "Segoe UI", system-ui, sans-serif; text-align: left; min-height: 48px; }
+.rm-scen button.on { box-shadow: 0 0 10px rgba(255,92,240,.55); border-color: #ff5cf0; }
+#remote > * { flex-shrink: 0; }   /* the alert box must not be squeezed under the keys */
+.rm-alerttest { background: linear-gradient(#4a3a18, #2c2412); color: #ffd27a; border: 1px solid #0d0e10; border-left: 4px solid #ffb000;
+  border-radius: 8px; padding: 12px 10px; font: bold 14px/1.3 "Segoe UI", system-ui, sans-serif; text-align: left; }
+.rm-alerttest.on { box-shadow: 0 0 12px rgba(255,176,0,.6); }
+
+/* ---------------------------------------------------------------- phone held sideways (landscape)
+   The radar fills the whole screen. The keys float over it in slim, half-transparent vertical columns:
+   left = range / sensitivity group, right = overlays, far right = system / audio keys, menu handles bottom left.
+   The display keeps its edge texts clear of the columns (AC.Display.insL / insR, set by the app). */
+@media (orientation: landscape) and (max-height: 520px) {
+  html, body { height: 100%; overflow: hidden; }
+  #app { display: block; position: relative; padding: 0; width: 100vw; height: 100vh; height: 100dvh; min-height: 0; }
+  /* keep clear of system areas (navigation / gesture area, set by the Android app as --sab / --sal / --sar) */
+  #unit { position: absolute; top: 0; left: var(--sal, 0px); right: var(--sar, 0px); bottom: var(--sab, 0px); width: auto; height: auto; align-self: stretch; justify-self: stretch; margin: 0; }
+  .bezel, .screen { align-self: stretch; justify-self: stretch; }
+  .bezel { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 0; border: 0; border-radius: 0; background: #000; box-shadow: none; }
+  .brand, .hint { display: none !important; }
+  .bezel-row { display: contents; }
+  .screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: auto; height: auto; min-width: 0; max-width: none;
+    aspect-ratio: auto; border-radius: 0; box-shadow: none; z-index: 0; }
+  .keys.left, .keys.right, .keys.bottom { position: absolute; top: 0; bottom: 0; margin: 0; width: auto;
+    display: flex; flex-direction: column; justify-content: center; gap: 5px; z-index: 5; pointer-events: none; }
+  .keys.left > *, .keys.right > *, .keys.bottom > * { pointer-events: auto; }
+  .keys.left { left: 6px; bottom: 76px; }          /* leaves room for the two menu handles below */
+  .keys.right { right: 74px; }
+  .keys.bottom { right: 6px; }
+  .rocker { flex-direction: column; }
+  .rocker .sk:first-child { border-radius: 9px 9px 2px 2px; }
+  .rocker .sk:last-child { border-radius: 2px 2px 9px 9px; margin-left: 0; margin-top: 1px; }
+  .sk { width: 62px; min-width: 0; min-height: 0; height: auto; padding: 3px 1px; font-size: 10px; letter-spacing: 0;
+    background: linear-gradient(rgba(80,86,94,.80), rgba(38,41,46,.80)); }
+  .sk svg { width: 14px; height: 14px; }
+  .sk small { font-size: 8.5px; }
+  .keys.bottom .sk { width: 62px; min-height: 0; }
+  .sk.pwr { width: 46px !important; min-height: 46px !important; height: 46px; align-self: center; }
+  .ui-handle { position: absolute; left: 6px; bottom: 6px; width: 62px; flex-direction: column; gap: 4px; margin: 0; z-index: 6; }
+  .ui-handle button { padding: 4px 3px; font-size: 9px; line-height: 1.2; white-space: normal; background: rgba(27,30,34,.85); }
+  #panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 60vw); max-height: none; z-index: 20; border-radius: 0; }
+  body:not(.ui-l2) #panel { display: none; }
+  /* compact level: only the essential keys */
+  body.ui-l0 .bezel { display: block; padding: 0; }
+  body.ui-l0 .bezel-row, body.ui-l0 .keys { display: flex; }
+  body.ui-l0 .bezel-row { display: contents; }
+  body.ui-l0 .screen { width: auto; height: auto; max-width: none; flex: none; }
+  body.ui-l0 .sk.ess { width: 66px; min-height: 52px; }
+  body.ui-l0 .rocker.ess { flex-direction: column; }
+  body.ui-l0 .keys.right { right: 6px; }          /* only WX/TERR there: share the edge column with TON */
+  body.ui-l0 .keys.bottom { right: 6px; top: auto; bottom: 0; height: 50%; justify-content: flex-start; }
+  body.ui-l0 .keys.right { top: 0; bottom: auto; height: 50%; justify-content: flex-end; padding-bottom: 3px; }
+}

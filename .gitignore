@@ -1,0 +1,19 @@
+# build outputs
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+*.zip
+*.ipa
+ios/build/
+ios/AeroCallout/www/
+ios/AeroCallout.xcodeproj/
+ios/Payload/
+
+# local / private
+.claude/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision

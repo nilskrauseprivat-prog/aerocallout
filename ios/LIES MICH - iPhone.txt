@@ -1,0 +1,30 @@
+AEROCALLOUT FUER DAS IPHONE (ohne Mac)
+=====================================
+
+So entsteht die App
+- Der Code liegt im Ordner "ios" (Swift-Huelle um dieselbe Web-App wie bei Android).
+- Gebaut wird in der Cloud: GitHub Actions baut auf einem Mac-Server die Datei AeroCallout.ipa
+  (Workflow .github/workflows/ios.yml, startet bei jedem Push automatisch).
+- Die IPA ist unsigniert. Sideloadly signiert sie beim Installieren mit deiner eigenen Apple-ID.
+
+Einmalig einrichten
+1. iPhone per USB-Kabel an den PC, "Diesem Computer vertrauen" bestaetigen.
+2. App "Apple Devices" (Microsoft Store, ist installiert) einmal oeffnen, iPhone auswaehlen,
+   "Bei WLAN-Verbindung dieses iPhone anzeigen" einschalten -> danach geht vieles auch per WLAN.
+3. Sideloadly (sideloadly.io) installieren, IPA hineinziehen, Apple-ID eintragen, Start.
+   Das Passwort gibst nur du selbst in Sideloadly ein.
+4. iPhone: Einstellungen -> Allgemein -> VPN & Geraeteverwaltung -> deiner Apple-ID vertrauen.
+5. iPhone: Einstellungen -> Datenschutz & Sicherheit -> Entwicklermodus -> Ein (Neustart).
+6. Fuer Fehlersuche: Einstellungen -> Apps -> Safari -> Erweitert -> Web-Inspektor -> Ein.
+
+Gueltigkeit
+- Mit kostenloser Apple-ID laeuft die App 7 Tage. Danach in Sideloadly erneut "Start"
+  (Einstellungen und Daten bleiben erhalten). Sideloadly kann das auch automatisch per WLAN.
+
+Was auf dem iPhone anders ist als bei Android
+- Bildschirm gesperrt / andere App im Vordergrund: iOS haelt die Web-Ansicht an. Dann uebernimmt
+  ein nativer Verkehrswarner (BackgroundWarner.swift): ADS-B-Abruf, TCAS-aehnliche Bewertung,
+  Sprachansage und Mitteilung. Gelaende-, Hindernis- und Wetterwarnungen gibt es nur bei offener App.
+- iOS kann den Bildschirm fuer eine Warnung nicht einschalten: es kommt eine Mitteilung + Ansage.
+- Kein Android Auto / CarPlay. Die Ansagen laufen aber per Bluetooth/CarPlay-Audio ueber das Auto.
+- Satellitenanzahl gibt iOS nicht heraus (Anzeige "GPS" statt "n SAT").

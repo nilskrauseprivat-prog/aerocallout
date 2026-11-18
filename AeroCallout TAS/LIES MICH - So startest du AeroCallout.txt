@@ -1,0 +1,76 @@
+AEROCALLOUT TAS - Verkehrs-, Gelaende- und Wetterwarnungen mit Sprachansagen
+==========================================================================
+
+WAS DU BRAUCHST
+- Windows 10 oder 11
+- Google Chrome oder Microsoft Edge
+- Internetverbindung (fuer Live-Verkehr, Gelaende- und Wetterdaten)
+- Lautsprecher / Kopfhoerer
+- Es muss nichts installiert werden.
+
+STARTEN
+1. Falls du eine ZIP-Datei bekommen hast: ZUERST ENTPACKEN
+   (Rechtsklick auf die ZIP-Datei -> "Alle extrahieren ...").
+   Aus der ZIP heraus funktioniert es nicht.
+2. Im entpackten Ordner doppelt auf "AeroCallout starten.bat" klicken.
+   - Es oeffnet sich ein schwarzes Fenster (der kleine Server) und der Browser.
+   - Falls Windows "Der Computer wurde durch Windows geschuetzt" meldet:
+     auf "Weitere Informationen" und dann "Trotzdem ausfuehren" klicken.
+3. Im Browser auf die runde Taste PWR klicken, den Hinweis bestaetigen.
+   Es folgt ein Selbsttest mit Sprachansage.
+4. Beenden: einfach das schwarze Fenster schliessen.
+
+AUSPROBIEREN OHNE FLUGZEUG
+- Taste SIM druecken -> simuliertes Flugzeug.
+- Rechts im Reiter "Simulation" ein Szenario anklicken,
+  z. B. "Frontal, gleiche Hoehe" oder "Hindernis: Sendemast voraus".
+- Mit "Echter Live-Verkehr" siehst du echte Flugzeuge um die simulierte Position.
+
+KEINE SPRACHANSAGEN?
+- Taste TON muss "AN" zeigen.
+- Taste MENU -> "AUDIO-TEST" druecken. Das Ergebnis zeigt, welche Stimme spricht.
+- Fuer englische Ansagen braucht Windows eine englische Stimme:
+  Einstellungen -> Zeit und Sprache -> Sprache -> Englisch hinzufuegen (mit Sprachausgabe).
+  Ohne englische Stimme spricht die App automatisch Deutsch.
+
+KARTE, WETTER, TESTS
+- MENU -> Straßenkarte: Immer / Mit Terrain / Aus, Stil Dunkel/Hell, Deckkraft einstellbar.
+- MENU -> Wetter-Deckkraft (Standard 50 %). Während Auto-Range bzw. einer Warnung
+  wird das Wetter automatisch ausgeblendet und danach wieder eingeblendet.
+- Taste TEST: Warnungstest - alle Warnungen im Schnelldurchlauf (ca. 40 s).
+- Reiter "Simulation": Die Szenarien laufen als Test an deiner echten Position und
+  enden automatisch (Verkehr/Wetter als Live-Test, Gelände/Hindernisse als kurzer Testflug).
+
+ANDROID AUTO (nur Android-App, AeroCallout.apk)
+Auf dem Autodisplay erscheint die Verkehrsanzeige im Stil der App (fuer breite
+Displays wie im VW ID.3 ausgelegt) mit Wetterradar/Gelaende und den Tasten
+RNG +/-, WX/TERR, SENS und TON.
+Auto-Modus (nur solange Android Auto verbunden ist): alle Flugzeuge werden angezeigt
+und die Hoehe wird fuer Warnungen ignoriert; die Ansagen enthalten Uhrzeit-Richtung,
+Entfernung und Annaeherungsgeschwindigkeit. Gelaende-/Hinderniswarnungen sind im Auto aus.
+Die Tasten im Auto blenden sich nach 8 s aus und werden zu kleinen Statusanzeigen;
+einmal aufs Display tippen holt sie zurueck. Als Orientierung sind grobe Strassen
+(Autobahn, Bundes- und Hauptstrassen, ohne Namen) wie auf einem Radarbild eingezeichnet.
+Flugzeug auf dem Autodisplay antippen: Infokarte mit Flugnummer, Airline, Typ,
+Kennzeichen, Route (z. B. VCE -> CGN), Hoehe, Geschwindigkeit und Position.
+Ueberflug-Ansage (Taste UEBERFLUG auf der Fernbedienung: ALLE / BESONDERE / AUS):
+z. B. "Lufthansa Airbus A320, 3000 feet, passing overhead shortly".
+Flugplaetze (Kreis mit Kennung) und Landebahnen sind dezent in der Karte eingezeichnet.
+Das Handy wird dabei zur Fernbedienung (grosse Tasten, Audio-Test und Simulationen).
+Mit "Radar auf dem Handy anzeigen" kommt die normale Ansicht zurueck.
+Die Ansagen kommen vom Handy und laufen ueber die Autolautsprecher.
+Weil die App nicht aus dem Play Store kommt, muss Android Auto sie einmalig erlauben:
+  1. Handy: Einstellungen -> Verbundene Geraete -> Verbindungseinstellungen ->
+     Android Auto oeffnen.
+  2. Ganz nach unten scrollen und 10x auf "Version" tippen -> Entwicklermodus bestaetigen.
+  3. Oben rechts das Menue (drei Punkte) -> "Entwicklereinstellungen" ->
+     "Unbekannte Quellen" einschalten.
+  4. Im Auto erscheint AeroCallout dann im App-Menue von Android Auto.
+Am besten AeroCallout vorher auf dem Handy starten (GPS, ADS-B und Ansagen laufen dort).
+
+WICHTIG
+AeroCallout ist ein Hobby-/Testprogramm und KEIN zugelassenes Kollisionswarn-,
+Gelaendewarn- oder Wetterradarsystem. Viele Luftfahrzeuge sind im Internet-ADS-B
+nicht sichtbar. Nicht zur Flugsicherheit verwenden - immer selbst rausschauen!
+
+Mehr Details: README.md (mit einem Texteditor oeffnen).

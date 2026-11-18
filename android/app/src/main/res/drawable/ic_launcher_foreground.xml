@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TCAS-style icon: range ring, ownship, amber TA circle, cyan diamond, red square (108 dp adaptive icon canvas) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:strokeColor="#EEF2F5"
+        android:strokeWidth="2.2"
+        android:fillColor="#00000000"
+        android:pathData="M54,30 A24,24 0 1,1 53.99,30 Z" />
+    <path
+        android:fillColor="#EEF2F5"
+        android:pathData="M54,46 L55.6,52 L63,56 L63,57.6 L55.6,56 L55.2,61 L57.6,63.2 L57.6,64.4 L54,63.6 L50.4,64.4 L50.4,63.2 L52.8,61 L52.4,56 L45,57.6 L45,56 L52.4,52 Z" />
+    <path
+        android:fillColor="#FFB000"
+        android:pathData="M68,38 m-4.5,0 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M40,35 L44,40 L40,45 L36,40 Z" />
+    <path
+        android:fillColor="#FF2B2B"
+        android:pathData="M64,64 L71,64 L71,71 L64,71 Z" />
+</vector>

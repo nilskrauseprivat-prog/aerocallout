@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>AeroCallout TAS</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Remote control for the car display (shown while Android Auto is connected) -->
+  <div id="remote" class="hidden">
+    <div class="rm-head"><b>AEROCALLOUT</b><span>Fernbedienung · Android Auto</span></div>
+    <div class="rm-status" id="rmStatus"></div>
+    <div class="rm-alert" id="rmAlert"></div>
+    <div class="rm-grid">
+      <button class="sk grp-rng" data-rk="rngUp"><b>RNG ▲</b><small>Bereich +</small></button>
+      <button class="sk grp-rng" data-rk="rngDn"><b>RNG ▼</b><small>Bereich −</small></button>
+      <button class="sk grp-terr" data-rk="terr"><b>WX/TERR</b><small data-rsub="terr"></small></button>
+      <button class="sk grp-tfc" data-rk="sens"><b>SENS</b><small data-rsub="sens"></small></button>
+      <button class="sk grp-wx" data-rk="gainUp"><b>GAIN ▲</b><small>WX empf. +</small></button>
+      <button class="sk grp-wx" data-rk="gainDn"><b>GAIN ▼</b><small data-rsub="gain"></small></button>
+      <button class="sk grp-rng" data-rk="carAlt"><b>HÖHE</b><small data-rsub="carAlt"></small></button>
+      <button class="sk grp-audio" data-rk="mute"><b>TON</b><small data-rsub="mute"></small></button>
+      <button class="sk grp-audio" data-rk="audiotest"><b>AUDIO</b><small>Test-Ansage</small></button>
+      <button class="sk grp-tfc" data-rk="carOverhead"><b>ÜBERFLUG</b><small data-rsub="carOverhead"></small></button>
+    </div>
+    <div class="rm-sim">
+      <div class="rm-sim-head"><b>SIMULATION</b><button class="sk grp-sim" data-rk="sim"><b>SIM</b><small data-rsub="sim"></small></button></div>
+      <button class="rm-alerttest" data-rk="alerttest">⚠ WARNUNGSTEST · alle Warnungen im Schnelldurchlauf (≈ 40 s)</button>
+      <div class="rm-scen" id="rmScen"></div>
+    </div>
+    <button class="rm-exit" id="rmExit">Radar auf dem Handy anzeigen</button>
+  </div>
+  <div id="app">
+    <section id="unit">
+      <div class="bezel">
+        <div class="brand"><span>AEROCALLOUT</span><span class="model">TAS-1 · VERKEHR · GELÄNDE · WETTER</span></div>
+        <div class="bezel-row">
+          <div class="keys left">
+            <div class="rocker grp-rng ess">
+              <button class="sk grp-rng ess" data-sk="rngUp" title="Anzeigebereich vergrößern (weiter hinaus sehen)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2.2"/><path d="M12 1v4M12 1l-2 2M12 1l2 2"/></svg><b>RNG ▲</b><small>Bereich +</small></button>
+              <button class="sk grp-rng ess" data-sk="rngDn" title="Anzeigebereich verkleinern (näher heranzoomen)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2.2"/><path d="M12 23v-4M12 23l-2-2M12 23l2-2"/></svg><b>RNG ▼</b><small>Bereich −</small></button>
+            </div>
+            <button class="sk grp-rng" data-sk="mode" title="Darstellung: 360° rundum oder ARC (Sektor nach vorne)"><svg viewBox="0 0 24 24"><path d="M3 18a9 9 0 0 1 18 0"/><path d="M12 18l-3-3M12 18l3-3"/><circle cx="12" cy="18" r="1.4"/></svg><b>MODE</b><small data-sub="mode"></small></button>
+            <button class="sk grp-rng" data-sk="alt" title="Höhenfilter für angezeigten Verkehr: NORM ±2700 ft, ABV mehr darüber, BLW mehr darunter, UNR alles"><svg viewBox="0 0 24 24"><path d="M8 20V4M8 4l-3 3M8 4l3 3M16 4v16M16 20l-3-3M16 20l3-3"/></svg><b>ALT</b><small data-sub="alt"></small></button>
+            <button class="sk grp-tfc ess" data-sk="sens" title="Empfindlichkeit der Verkehrswarnungen: LO, NORM, HI, MAX"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="2"/><path d="M8 9a6 6 0 0 0 0 8M16 9a6 6 0 0 1 0 8M5 6a10 10 0 0 0 0 14M19 6a10 10 0 0 1 0 14"/></svg><b>SENS</b><small data-sub="sens"></small></button>
+          </div>
+          <div class="screen">
+            <canvas id="scr"></canvas>
+            <div id="menu" class="menu hidden">
+              <div class="menu-head"><span>OPTIONEN</span><button id="menuClose" title="Schließen">✕ SCHLIESSEN</button></div>
+              <div class="menu-body">
+                <h4>EINHEITEN</h4>
+                <div class="seg-row"><span>Schnellwahl</span><div class="seg"><button data-preset="aviation">Luftfahrt</button><button data-preset="metric">Metrisch</button></div></div>
+                <div class="seg-row"><span>Entfernung</span><div class="seg" data-seg="distUnit"><button data-val="nm">NM</button><button data-val="km">km</button></div></div>
+                <div class="seg-row"><span>Geschwindigkeit</span><div class="seg" data-seg="speedUnit"><button data-val="kt">kt</button><button data-val="kmh">km/h</button></div></div>
+                <div class="seg-row"><span>Höhe</span><div class="seg" data-seg="altUnit"><button data-val="ft">ft</button><button data-val="m">m</button></div></div>
+                <div class="seg-row"><span>Steigrate</span><div class="seg" data-seg="vsUnit"><button data-val="fpm">ft/min</button><button data-val="mps">m/s</button></div></div>
+
+                <h4>ANSAGEN</h4>
+                <div class="seg-row"><span>Sprache</span><div class="seg" data-seg="lang"><button data-val="en">English</button><button data-val="de">Deutsch</button></div></div>
+                <div class="seg-row"><span>Stimme</span><div class="seg" data-seg="voiceProfile"><button data-val="female">Weiblich</button><button data-val="friendly">Freundlich</button><button data-val="firm">Bestimmt</button><button data-val="male">Männlich</button></div></div>
+                <div class="seg-row"><span></span><button class="testbtn" data-voiceprobe>▶ STIMMPROBE</button><span class="small" data-voicename></span></div>
+                <div class="seg-row"><span>Stil</span><div class="seg" data-seg="style"><button data-val="garmin">Ausführlich</button><button data-val="tcas">Kurz (TCAS)</button></div></div>
+                <div class="seg-row"><span>Annäherung</span><div class="seg" data-seg="calloutClosure"><button data-val="true">Ansagen</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Warnton</span><div class="seg" data-seg="warnTone"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Lautstärke</span><input type="range" min="0.2" max="1" step="0.05" data-set="volume" data-num></div>
+                <div class="seg-row"><span>Sprechtempo</span><input type="range" min="0.8" max="1.4" step="0.05" data-set="voiceRate" data-num></div>
+                <div class="seg-row"><span></span><button class="testbtn" data-audiotest>▶ AUDIO-TEST</button></div>
+                <div class="audio-result" data-audioresult></div>
+
+                <h4>SENSOREN &amp; ANZEIGE</h4>
+                <div class="seg-row"><span>Autostart</span><div class="seg" data-seg="autoStart"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Bildschirm</span><div class="seg" data-seg="screenMode"><button data-val="wake">Standby + Wecken</button><button data-val="on">Immer an</button></div></div>
+                <div class="seg-row"><span>Wetter-Deckkraft</span><input type="range" min="0.2" max="1" step="0.05" data-set="wxAlpha" data-num></div>
+                <div class="seg-row"><span>Straßenkarte</span><div class="seg" data-seg="mapMode"><button data-val="on">Immer</button><button data-val="terr">Mit Terrain</button><button data-val="off">Aus</button></div></div>
+                <div class="seg-row"><span>Karten-Stil</span><div class="seg" data-seg="mapStyle"><button data-val="dark">Dunkel</button><button data-val="light">Hell</button></div></div>
+                <div class="seg-row"><span>Karten-Deckkraft</span><input type="range" min="0.2" max="1" step="0.05" data-set="mapAlpha" data-num></div>
+                <div class="seg-row"><span>Schriftgröße</span><div class="seg" data-seg="fontScale"><button data-val="0.85">Klein</button><button data-val="1">Normal</button><button data-val="1.2">Groß</button><button data-val="1.4">Sehr groß</button></div></div>
+                <div class="seg-row"><span>Lageanzeige</span><div class="seg" data-seg="attShow"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Koppelnavigation</span><div class="seg" data-seg="drOn"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Barometer</span><div class="seg" data-seg="baroOn"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Hindernisse zeigen</span><div class="seg" data-seg="obsShow"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span></span><button class="testbtn" data-calib>⟲ LAGE KALIBRIEREN</button></div>
+                <div class="audio-result" data-calibresult>Handy in der Halterung, Flugzeug waagerecht (am Boden oder im Geradeausflug), dann kalibrieren.</div>
+
+                <h4>WARNUNGEN</h4>
+                <div class="seg-row"><span>Verkehr</span><div class="seg" data-seg="trafficEnabled"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Tasten ausblenden</span><div class="seg" data-seg="autoHide"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>WX-Sweep</span><div class="seg" data-seg="wxSector"><button data-val="arc">±60° vorne</button><button data-val="full">360°</button></div></div>
+                <div class="seg-row"><span>Auto-Range</span><div class="seg" data-seg="autoRange"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Empfindlichkeit</span><div class="seg" data-seg="sensGain"><button data-val="lo">LO</button><button data-val="norm">NORM</button><button data-val="hi">HI</button><button data-val="max">MAX</button></div></div>
+                <div class="seg-row"><span>Gelände</span><div class="seg" data-seg="terrainEnabled"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+                <div class="seg-row"><span>Hindernisse</span><div class="seg" data-seg="obstacleEnabled"><button data-val="true">An</button><button data-val="false">Aus</button></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="keys right">
+            <button class="sk grp-wx" data-sk="wx" title="Wetterradar ein/aus"><svg viewBox="0 0 24 24"><path d="M7 14h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6 1.4A3.4 3.4 0 0 0 7 14z"/><path d="M9 17l-1 3M13 17l-1 3M17 17l-1 3"/></svg><b>WX</b><small data-sub="wx"></small></button>
+            <div class="rocker grp-wx">
+              <button class="sk grp-wx" data-sk="gainUp" title="Wetterradar empfindlicher (mehr Niederschlag sichtbar)"><svg viewBox="0 0 24 24"><path d="M5 20v-3M10 20v-6M15 20v-9M20 20V5"/></svg><b>GAIN ▲</b><small>WX empf. +</small></button>
+              <button class="sk grp-wx" data-sk="gainDn" title="Wetterradar unempfindlicher (nur starker Niederschlag)"><svg viewBox="0 0 24 24"><path d="M5 20V5M10 20V8M15 20v-6M20 20v-3"/></svg><b>GAIN ▼</b><small data-sub="gain"></small></button>
+            </div>
+            <button class="sk grp-terr ess" data-sk="terr" title="Anzeige im Radar wechseln: AUS → Wetter → Gelände → beides"><svg viewBox="0 0 24 24"><path d="M2 20l7-12 4 6 3-4 6 10z"/><path d="M15 7h5a2.5 2.5 0 0 0 0-5 3 3 0 0 0-5.6.8A2 2 0 0 0 15 7z"/></svg><b>WX/TERR</b><small data-sub="terr"></small></button>
+            <button class="sk grp-sys" data-sk="menu" title="Optionen: Einheiten, Stimme, Ansagen, Warnungen"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg><b>MENU</b><small>Optionen</small></button>
+          </div>
+        </div>
+        <div class="keys bottom">
+          <button class="sk pwr" data-sk="pwr" title="System ein-/ausschalten"><svg viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M7 6.5a7.5 7.5 0 1 0 10 0"/></svg><span class="led" id="pwrLed"></span><b>PWR</b><small data-sub="pwr"></small></button>
+          <button class="sk grp-audio ess" data-sk="mute" title="Sprachansagen ein-/ausschalten"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><b>TON</b><small data-sub="mute"></small></button>
+          <button class="sk grp-inhb" data-sk="inhb" title="Geländewarnungen vorübergehend sperren (z. B. bei Landung auf unbekanntem Platz)"><svg viewBox="0 0 24 24"><path d="M2 20l7-12 4 6 3-4 6 10z"/><path d="M3 3l18 18"/></svg><b>GELÄNDE</b><small data-sub="inhb"></small></button>
+          <button class="sk grp-sim" data-sk="sim" title="Simulation ein/aus"><svg viewBox="0 0 24 24"><path d="M12 2.5l1.6 7 7.4 3.2v1.8l-7.4-1.3-.8 5 2.7 2v1.3L12 20.6l-3.5.9v-1.3l2.7-2-.8-5-7.4 1.3v-1.8l7.4-3.2z"/></svg><b>SIM</b><small data-sub="sim"></small></button>
+          <button class="sk grp-sys" data-sk="test" title="Warnungstest: alle Warnungen im Schnelldurchlauf (ca. 40 s), nochmal drücken bricht ab"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg><b>TEST</b><small>Warnungen</small></button>
+        </div>
+      </div>
+      <div class="ui-handle">
+        <button id="hKeys" title="Alle Radar-Tasten ein-/ausklappen">▲ Alle Tasten</button>
+        <button id="hPanel" title="Status, Simulation, Einstellungen und Hilfe ein-/ausklappen">☰ Status &amp; Einstellungen</button>
+      </div>
+      <p class="hint" id="hint">PWR drücken, um das System zu starten.</p>
+    </section>
+
+    <section id="panel">
+      <nav class="tabs">
+        <button data-tab="status" class="active">Status</button>
+        <button data-tab="sim">Simulation</button>
+        <button data-tab="settings">Einstellungen</button>
+        <button data-tab="help">Hilfe</button>
+      </nav>
+
+      <div class="tab active" id="tab-status">
+        <div id="statusSources"></div>
+        <h3>Verkehr</h3>
+        <div id="statusTraffic"></div>
+        <h3>Ansagen-Protokoll</h3>
+        <div id="statusLog" class="log"></div>
+      </div>
+
+      <div class="tab" id="tab-sim">
+        <div class="row">
+          <label><input type="checkbox" data-set="simEnabled"> Simulation aktiv (simuliertes eigenes Flugzeug)</label>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" data-set="simLiveTraffic"> Echter Live-Verkehr um die simulierte Position</label>
+        </div>
+        <div class="row">
+          <label>Startposition
+            <select id="simPreset"></select>
+          </label>
+          <button id="simReset">Neu starten</button>
+          <button id="simPause">Pause</button>
+        </div>
+        <div class="simctl">
+          <div><span>Kurs</span><b id="simHdg">-</b><button data-sim="turnL">◀ Kurve</button><button data-sim="turn0">Gerade</button><button data-sim="turnR">Kurve ▶</button></div>
+          <div><span>Geschw.</span><b id="simGs">-</b><button data-sim="gsDn" data-simlbl="gsDn"></button><button data-sim="gsUp" data-simlbl="gsUp"></button></div>
+          <div><span>Höhe</span><b id="simAlt">-</b><button data-sim="altDn" data-simlbl="altDn"></button><button data-sim="altUp" data-simlbl="altUp"></button></div>
+          <div><span>Steigrate</span><b id="simVs">-</b><button data-sim="vsDn" data-simlbl="vsDn"></button><button data-sim="vs0">0</button><button data-sim="vsUp" data-simlbl="vsUp"></button></div>
+        </div>
+        <p class="autopilot" id="simScript"></p>
+        <p class="small">Tastatur: ←/→ Kurve, ↑/↓ Steigen/Sinken, Bild↑/Bild↓ Geschwindigkeit, L = geradeaus &amp; horizontal, P = Pause.</p>
+        <h3>Szenarien</h3>
+        <div id="scenarios" class="scenarios"></div>
+        <button id="scenClear" class="wide">Szenario beenden</button>
+        <button id="alertTestBtn" class="wide">⚠ Warnungstest: alle Warnungen im Schnelldurchlauf (≈ 40 s, an der aktuellen Position)</button>
+      </div>
+
+      <div class="tab" id="tab-settings">
+        <fieldset>
+          <legend>Einheiten</legend>
+          <label>Entfernung <select data-set="distUnit"><option value="nm">Nautische Meilen (NM)</option><option value="km">Kilometer (km)</option></select></label>
+          <label>Geschwindigkeit <select data-set="speedUnit"><option value="kt">Knoten (kt)</option><option value="kmh">km/h</option></select></label>
+          <label>Höhe <select data-set="altUnit"><option value="ft">Fuß (ft)</option><option value="m">Meter (m)</option></select></label>
+          <label>Steigrate <select data-set="vsUnit"><option value="fpm">ft/min</option><option value="mps">m/s</option></select></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Ansagen</legend>
+          <label>Sprache
+            <select data-set="lang"><option value="en">English (Standard in der Luftfahrt)</option><option value="de">Deutsch</option></select>
+          </label>
+          <label>Stil
+            <select data-set="style">
+              <option value="garmin">Ausführlich – „Traffic! 2 o'clock, high, 3 miles“</option>
+              <option value="tcas">Kurz wie TCAS – „Traffic, Traffic“</option>
+            </select>
+          </label>
+          <label>Stimme
+            <select data-set="voiceProfile">
+              <option value="female">Weiblich – neutral</option>
+              <option value="friendly">Weiblich freundlich – ruhiger, etwas höher</option>
+              <option value="firm">Weiblich bestimmt – schneller, tiefer</option>
+              <option value="male">Männlich</option>
+              <option value="custom">Bestimmte Stimme (unten wählen)</option>
+            </select>
+          </label>
+          <label>Bestimmte Stimme <select id="voiceSelect" data-set="voiceName"></select></label>
+          <div class="btnrow"><button data-voiceprobe>▶ Stimmprobe</button><span class="small" data-voicename></span></div>
+          <p class="small" id="voiceHint"></p>
+          <label>Sprechtempo <input type="range" min="0.8" max="1.4" step="0.05" data-set="voiceRate" data-num></label>
+          <label>Lautstärke <input type="range" min="0.2" max="1" step="0.05" data-set="volume" data-num></label>
+          <label><input type="checkbox" data-set="warnTone"> Kurzer Warnton vor Warnungen (auch Ersatz, falls die Sprachausgabe ausfällt)</label>
+          <label><input type="checkbox" data-set="calloutClosure"> Annäherungsgeschwindigkeit (Relative Speed) bei Verkehrswarnungen ansagen und anzeigen</label>
+          <label><input type="checkbox" data-set="announceProx"> Auch nahen Verkehr ansagen (ohne Konflikt, &lt; 6 NM)</label>
+          <label><input type="checkbox" data-set="repeatTA"> Verkehrshinweis (TA) alle 20 s wiederholen</label>
+          <label><input type="checkbox" data-set="clearOfConflict"> „Clear of conflict“ ansagen, wenn der Konflikt vorbei ist</label>
+          <div class="btnrow">
+            <button data-audiotest>▶ Audio-Test</button>
+            <button data-test="ta">Hinweis (TA)</button><button data-test="warn">Verkehr-Warnung</button>
+            <button data-test="tcaut">Caution Terrain</button><button data-test="twarn">Pull up</button><button data-test="obs">Obstacle</button>
+          </div>
+          <div class="audio-result" data-audioresult></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Verkehrswarnungen</legend>
+          <label><input type="checkbox" data-set="trafficEnabled"> Verkehrswarnungen aktiv</label>
+          <label><input type="checkbox" data-set="autoHide"> Tasten nach 8 s automatisch ausblenden (nur RNG, SENS, TERR und TON bleiben) – Antippen blendet alle wieder ein</label>
+          <label><input type="checkbox" data-set="autoRange"> Auto-Range: bei Verkehrshinweis/-warnung automatisch auf den wichtigsten Verkehr zoomen, danach zurück zum eingestellten Bereich</label>
+          <label>Empfindlichkeit
+            <select data-set="sensGain">
+              <option value="lo">LO – weniger, spätere Warnungen (×0,75)</option>
+              <option value="norm">NORM – Standard (×1,0)</option>
+              <option value="hi">HI – frühere Warnungen (×1,25)</option>
+              <option value="max">MAX – sehr früh, mehr Fehlalarme (×1,5)</option>
+            </select>
+          </label>
+          <label>Schutzzone (Sensitivity Level)
+            <select data-set="sens">
+              <option value="auto">AUTO – passt sich der Flughöhe an (empfohlen)</option>
+              <option value="sl2">SL2 – Bodennähe: 20 s / 0,30 NM</option>
+              <option value="sl3">SL3 – unter 2350 ft AGL: 25 s / 0,33 NM</option>
+              <option value="sl4">SL4 – bis 5000 ft: 30 s / 0,48 NM</option>
+              <option value="sl5">SL5 – bis 10 000 ft: 40 s / 0,75 NM</option>
+              <option value="sl6">SL6 – bis FL200: 45 s / 1,0 NM</option>
+              <option value="sl7">SL7 – darüber: 48 s / 1,3 NM</option>
+            </select>
+          </label>
+          <label>Höhenfilter Anzeige
+            <select data-set="altBand">
+              <option value="norm">NORM – ±2700 ft</option>
+              <option value="abv">ABV – mehr darüber (+9900 / −2700 ft)</option>
+              <option value="blw">BLW – mehr darunter (+2700 / −9900 ft)</option>
+              <option value="unr">UNR – alle Höhen</option>
+            </select>
+          </label>
+          <label>Warnungen erst ab Geschwindigkeit (<span data-unit="speed"></span>) – darunter gilt das Flugzeug als am Boden
+            <input type="number" min="0" step="5" data-set="minSpeedKt" data-conv="speed"></label>
+          <label>Schriftgröße der Infotexte im Display
+            <select data-set="fontScale" data-num><option value="0.85">Klein</option><option value="1">Normal</option><option value="1.2">Groß</option><option value="1.4">Sehr groß</option></select>
+          </label>
+          <label><input type="checkbox" data-set="showCallsigns"> Kennzeichen aller Flugzeuge anzeigen</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Gelände &amp; Hindernisse</legend>
+          <label><input type="checkbox" data-set="terrainEnabled"> Geländewarnungen</label>
+          <label><input type="checkbox" data-set="obstacleEnabled"> Hinderniswarnungen</label>
+          <label><input type="checkbox" data-set="osmObstacles"> Hindernisse aus OpenStreetMap laden</label>
+          <label><input type="checkbox" data-set="obsShow"> Hindernisse im Display anzeigen (das warnende Hindernis wird immer gezeigt)</label>
+          <label>Ladeumkreis Hindernisse (km, 10–60) <input type="number" min="10" max="60" step="5" data-set="obsRadiusKm" data-num></label>
+          <label>Vorwarnzeit „Caution Terrain“ (s) <input type="number" min="30" max="90" step="5" data-set="terrLookahead" data-num></label>
+          <label>Mindestabstand zum Gelände für „Caution“ (<span data-unit="alt"></span>)
+            <input type="number" min="0" step="10" data-set="terrCautionFt" data-conv="alt"></label>
+          <button id="terrDownload">Gelände für 60 km Umkreis vorladen (offline)</button>
+          <span id="terrDlInfo" class="small"></span>
+        </fieldset>
+
+        <fieldset>
+          <legend>Sensoren (Android-App)</legend>
+          <label><input type="checkbox" data-set="ahrsOn"> Lagesensoren verwenden (Kreisel, Beschleunigung, Kompass – GPS-gestützt, mit Driftausgleich)</label>
+          <label><input type="checkbox" data-set="attShow"> Lageanzeige (künstlicher Horizont) im Display</label>
+          <label><input type="checkbox" data-set="baroOn"> Barometer für Steigrate, Höhe bei GPS-Ausfall und Höhenvergleich mit Verkehr (Druckhöhe)</label>
+          <label><input type="checkbox" data-set="drOn"> Koppelnavigation bei GPS-Ausfall (max. 60 s, Warnungen bis 20 s)</label>
+          <button data-calib>⟲ Lage kalibrieren</button>
+          <div class="audio-result" data-calibresult></div>
+          <p class="small">Kalibrieren: Handy fest in der Halterung, Flugzeug waagerecht (am Boden oder im ruhigen Geradeausflug). Die Kursabweichung zwischen Handy und Flugzeugachse gleicht das GPS im Flug automatisch aus.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Wetterradar</legend>
+          <label><input type="checkbox" data-set="wxOn"> Wetter anzeigen</label>
+          <label>Empfindlichkeit (Gain): <b id="wxGainVal"></b> <input type="range" min="-10" max="10" step="2" data-set="wxGain" data-num></label>
+          <label>Sektor
+            <select data-set="wxSector"><option value="arc">±60° nach vorne (wie Bordradar)</option><option value="full">360° rundum – das ganze Bild wird im Kreis aktualisiert</option></select>
+          </label>
+          <label><input type="checkbox" data-set="wxThunder"> Gewittersymbole (Open-Meteo)</label>
+        </fieldset>
+
+        <details>
+          <summary>Erweitert (Datenquellen, GPS)</summary>
+          <fieldset>
+            <legend>Datenquellen</legend>
+            <label><input type="checkbox" data-set="srcAdsblol"> adsb.lol</label>
+            <label><input type="checkbox" data-set="srcAdsbfi"> adsb.fi</label>
+            <label>Suchradius (<span data-unit="dist"></span>) <input type="number" min="5" step="5" data-set="radiusNM" data-conv="dist"></label>
+            <label>Abfrageintervall gesamt (ms) <input type="number" min="1000" max="5000" step="500" data-set="pollMs" data-num></label>
+            <label>Max. Alter einer Flugzeugposition (s) <input type="number" min="5" max="20" step="1" data-set="maxAgeS" data-num></label>
+            <label>Eigene ICAO-Adresse (hex) – blendet den eigenen Transponder aus <input type="text" maxlength="6" data-set="ownHex" placeholder="z. B. 3c6589"></label>
+            <label>Proxy für ADS-B (auto = lokaler Server) <input type="text" data-set="proxyBase" placeholder="auto"></label>
+          </fieldset>
+          <fieldset>
+            <legend>GPS-Höhe</legend>
+            <label>Höhenbezug des Geräts
+              <select data-set="gpsAltRef"><option value="ellipsoid">Ellipsoid (W3C-Standard, meist richtig)</option><option value="msl">Meereshöhe (MSL)</option></select>
+            </label>
+            <label>Geoid-Undulation in m (Deutschland ≈ 45–50) <input type="number" min="-110" max="90" step="1" data-set="geoidM" data-num></label>
+          </fieldset>
+        </details>
+        <button id="resetSettings" class="wide danger">Alle Einstellungen zurücksetzen</button>
+      </div>
+
+      <div class="tab" id="tab-help">
+        <h3>Bedienung</h3>
+        <ul class="small">
+          <li><b>PWR</b> System ein/aus · <b>TEST</b> Selbsttest · <b>MENU</b> Optionen (Einheiten, Ansagen, Warnungen)</li>
+          <li><b>RNG ▲/▼</b> Anzeigebereich · <b>MODE</b> 360° rundum oder ARC (nach vorne) · <b>ALT</b> Höhenfilter · <b>SENS</b> Empfindlichkeit</li>
+          <li><b>WX</b> Wetterradar · <b>GAIN ▲/▼</b> Wetter-Empfindlichkeit · <b>TERR</b> Geländebild</li>
+          <li><b>TON</b> Sprachansagen an/stumm · <b>GELÄNDE</b> Geländewarnungen sperren/freigeben · <b>SIM</b> Simulation</li>
+          <li>Der Untertitel jeder Taste zeigt den aktuellen Zustand.</li>
+          <li><b>Auto-Range</b>: Bei einem Verkehrshinweis oder einer Warnung zoomt das Display auf den wichtigsten Verkehr (Anzeige „AUTO RNG“, Bereich in Gelb) und kehrt 6 s nach Ende des Konflikts zum eingestellten Bereich zurück. RNG ▲/▼ übernimmt sofort manuell.</li>
+        </ul>
+        <h3>Symbole</h3>
+        <ul class="legend">
+          <li><span class="sym other"></span> Anderer Verkehr</li>
+          <li><span class="sym prox"></span> Naher Verkehr (Proximate, &lt; 6 NM / ±1200 ft)</li>
+          <li><span class="sym ta"></span> Verkehrshinweis (TA) – Ansage „Traffic“</li>
+          <li><span class="sym warn"></span> Unmittelbarer Konflikt – wiederholte Ansage. <b>Keine Ausweichempfehlung.</b></li>
+          <li><b>+05</b> = 500 ft höher, <b>−12</b> = 1200 ft tiefer (metrisch: Zehner-Meter), Pfeil = steigt/sinkt ≥ 500 ft/min</li>
+          <li>Wetter: <span style="color:#0c0">grün</span> 20–30 dBZ, <span style="color:#ff0">gelb</span> 30–40, <span style="color:#f00">rot</span> 40–50, <span style="color:#f0f">magenta</span> &gt; 50 dBZ, ⚡ Gewitter</li>
+          <li>Gelände (TERR): rot &gt; 2000 ft über dir, gelb 1000–2000 ft über / −500…+1000 ft (gepunktet), grün darunter</li>
+        </ul>
+        <h3>Keine Ansagen zu hören?</h3>
+        <ul class="small">
+          <li>Taste <b>TON</b> muss „AN“ zeigen (im Display steht sonst <b>AUDIO OFF</b>).</li>
+          <li><b>MENU → AUDIO-TEST</b> drücken: Das Ergebnis zeigt, ob und mit welcher Stimme gesprochen wird.</li>
+          <li>Für englische Ansagen braucht Windows eine englische Stimme: <i>Einstellungen → Zeit und Sprache → Sprache → Englisch hinzufügen</i> (mit „Sprachausgabe“). Fehlt sie, spricht die App automatisch Deutsch.</li>
+          <li>Windows-Lautstärke und das Ausgabegerät prüfen. Der Warnton kommt auch dann, wenn die Sprachausgabe streikt.</li>
+        </ul>
+        <h3>Wichtiger Hinweis</h3>
+        <p class="small" id="disclaimerText"></p>
+        <h3>Datenquellen &amp; Lizenzen</h3>
+        <p class="small">Verkehr: adsb.lol (ODbL), adsb.fi Open Data · Gelände: AWS Terrain Tiles (Mapzen, SRTM u. a.) · Hindernisse/Flugplätze: © OpenStreetMap-Mitwirkende (ODbL) · Radar: RainViewer · Gewitter: Open-Meteo (CC BY 4.0). AeroCallout ist Open Source (MIT).</p>
+      </div>
+    </section>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Nur zur ergänzenden Lageinformation</h2>
+      <p id="modalText"></p>
+      <button id="modalOk">Verstanden – System starten</button>
+    </div>
+  </div>
+
+  <script src="js/geo.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/gps.js"></script>
+  <script src="js/adsb.js"></script>
+  <script src="js/traffic-logic.js"></script>
+  <script src="js/terrain.js"></script>
+  <script src="js/obstacles.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/ahrs.js"></script>
+  <script src="js/android-tts.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/display.js"></script>
+  <script src="js/selftest.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/aircraftdb.js"></script>
+  <script src="js/alerttest.js"></script>
+  <script src="js/roads.js"></script>
+  <script src="js/car.js"></script>
+</body>
+</html>
