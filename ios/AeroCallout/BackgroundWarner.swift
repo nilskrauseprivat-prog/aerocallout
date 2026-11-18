@@ -140,7 +140,8 @@ final class BackgroundWarner {
         if sens.hasPrefix("sl"), let v = Int(sens.dropFirst(2)) { sl = v }
         else if let a = ownMSLft { sl = a < 1000 ? 2 : a < 2350 ? 3 : a < 5000 ? 4 : a < 10000 ? 5 : a < 20000 ? 6 : 7 }
         let base = BackgroundWarner.slTable[sl] ?? BackgroundWarner.slTable[4]!
-        let gain = ["lo": 0.75, "norm": 1.0, "hi": 1.25, "max": 1.5][str("sensGain", "norm")] ?? 1
+        let gains: [String: Double] = ["lo": 0.75, "norm": 1.0, "hi": 1.25, "max": 1.5]
+        let gain: Double = gains[str("sensGain", "norm")] ?? 1
         let NM = BackgroundWarner.NM, FT = BackgroundWarner.FT, KT = BackgroundWarner.KT
         let taTau = base.taTau * gain, taDmod = base.taDmod * gain * NM, taZ = base.taZ * min(gain, 1.3)
         let wTau = base.wTau * gain, wHor = max(base.wDmod * NM, 250) * gain, wZ = base.wZ * min(gain, 1.3)
@@ -194,7 +195,9 @@ final class BackgroundWarner {
             let rEff = max(0, r - unc)
             var rangeOk = rEff <= taDmod
             if !rangeOk && rdot < -0.5 && rEff > 0 {
-                rangeOk = (taDmod * taDmod - rEff * rEff) / (rEff * rdot) <= taTau
+                let numer: Double = taDmod * taDmod - rEff * rEff
+                let den: Double = rEff * rdot
+                rangeOk = numer / den <= taTau
             }
             var altOk = true
             if let ra = relAltFt {
