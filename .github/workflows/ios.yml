@@ -9,7 +9,12 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    # Two runner types in parallel: the free macOS arm64 pool is sometimes out of capacity.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15-intel, macos-26]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +47,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: AeroCallout-ipa
+          name: AeroCallout-ipa-${{ matrix.os }}
           path: ios/AeroCallout.ipa
           retention-days: 30
