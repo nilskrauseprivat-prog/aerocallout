@@ -214,7 +214,8 @@ body.ui-l0 .keys.left, body.ui-l0 .keys.right { justify-content: center; gap: 14
 
 /* Phones in portrait (e.g. Pixel 4a, 393 px): display full width, key columns become rows below it. */
 @media (max-width: 600px) {
-  #app { padding: 4px; gap: 10px; }
+  /* iPhone: the page runs full screen, the Dynamic Island / notch and the home indicator cover its edges (0 elsewhere) */
+  #app { padding: calc(4px + env(safe-area-inset-top, 0px)) 4px calc(4px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
   #unit { width: 100%; }
   .bezel { padding: 8px 6px 10px; border-radius: 14px; }
   .brand { padding: 0 4px 6px; font-size: 11px; }
@@ -239,13 +240,15 @@ body.ui-l0 .keys.left, body.ui-l0 .keys.right { justify-content: center; gap: 14
   .seg-row > span { width: 30%; font-size: 11px; }
 
   /* idle on phones: tall radar display, the 5 essential keys in one row below it */
-  body.ui-l0 #app { padding: 0; }
+  body.ui-l0 #app { padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
   body.ui-l0 .bezel { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; padding: 4px; border-radius: 0; }
   body.ui-l0 .bezel-row, body.ui-l0 .keys { display: contents; }
-  body.ui-l0 .screen { order: 0; flex: 0 0 100%; width: 100%; aspect-ratio: auto; height: calc(100vh - 126px); height: calc(100dvh - 126px); }
+  body.ui-l0 .screen { order: 0; flex: 0 0 100%; width: 100%; aspect-ratio: auto; height: calc(100vh - 126px);
+    height: calc(100dvh - 126px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
   body.ui-l0 .rocker.ess, body.ui-l0 .sk.ess { order: 1; }
   /* level 1/2 on phones: display uses the height left over by the three key rows */
-  body.ui-l1 .screen, body.ui-l2 .screen { aspect-ratio: auto; height: calc(100vh - 330px); height: calc(100dvh - 330px); min-height: 300px; }
+  body.ui-l1 .screen, body.ui-l2 .screen { aspect-ratio: auto; height: calc(100vh - 330px);
+    height: calc(100dvh - 330px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 300px; }
   .ui-handle { margin: 4px 4px 0; }
   body.ui-l0 .ui-handle { margin-top: 2px; }
   body.ui-l0 .sk.ess { width: calc((100vw - 32px) / 5); min-height: 66px; }

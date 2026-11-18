@@ -10,6 +10,8 @@ ios/build/
 ios/AeroCallout/www/
 ios/AeroCallout.xcodeproj/
 ios/Payload/
+ios/sim/shots/
+ios/sim/.profile-state.json
 
 # local / private
 .claude/

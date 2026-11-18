@@ -1,12 +1,14 @@
 import UIKit
 import WebKit
 import UserNotifications
+import CoreLocation
 
 /// Hosts the AeroCallout web app (bundled in the app) and connects it to the native services.
 final class WebViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
     private var web: WKWebView!
     private var ticker: Timer?
     private var monitoring = false
+    private var lastFix: (CLLocation, [String: Any])?
 
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
@@ -47,9 +49,13 @@ final class WebViewController: UIViewController, WKUIDelegate, WKNavigationDeleg
         }
         Location.shared.onFix = { [weak self] loc, fix in
             BackgroundWarner.shared.update(loc)
+            self?.lastFix = (loc, fix)
+            // The page is suspended in the background: calls would pile up and run all at once on return.
+            guard UIApplication.shared.applicationState != .background else { return }
             self?.js("window.__gpsFix && window.__gpsFix(\(Self.json(fix)))")
         }
         Motion.shared.onSample = { [weak self] o in
+            guard UIApplication.shared.applicationState != .background else { return }
             self?.js("window.__imu && window.__imu(\(Self.json(o)))")
         }
 
@@ -85,6 +91,11 @@ final class WebViewController: UIViewController, WKUIDelegate, WKNavigationDeleg
     @objc private func willEnterForeground() {
         BackgroundWarner.shared.stop()
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        // Hand the page the current position first, otherwise its last fix is as old as the time in the
+        // background and it announces "GPS position lost" (Android keeps the page running, iOS does not).
+        if let last = lastFix, Date().timeIntervalSince(last.0.timestamp) < 3 {
+            js("window.__gpsFix && window.__gpsFix(\(Self.json(last.1)))")
+        }
         js("window.AC && AC.App && AC.App.tick && AC.App.tick()")
     }
 
