@@ -9,11 +9,11 @@ on:
 
 jobs:
   build:
-    # Two runner types in parallel: the free macOS arm64 pool is sometimes out of capacity.
+    # Several runner types in parallel: the free macOS arm64 pool is sometimes out of capacity.
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15-intel]
+        os: [macos-15-intel, macos-14, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
