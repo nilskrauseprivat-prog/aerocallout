@@ -1118,8 +1118,9 @@
       const pad = 8 * u;
       // left / right margins: in landscape the key columns float over the radar, texts stay beside them
       const padL = pad + (this.insL || 0), padR = pad + (this.insR || 0);
+      const padT = pad + (this.insT || 0);   // iPhone: clear of the rounded corners beside the Dynamic Island
       // left column: traffic system state
-      let y = pad + fs;
+      let y = padT + fs;
       // TFC: green = traffic data current; red = ADS-B data lost / no position (traffic picture not current);
       // amber = delayed (>= 10 s) or traffic function switched off.
       const f = st.flags || {};
@@ -1138,7 +1139,7 @@
       this.text(S.altUnit === 'm' ? 'ALT ×10 m' : 'ALT ×100 ft', padL, y, COL.grey, sm);
 
       // right column: WX / TERR
-      let ry = pad + fs;
+      let ry = padT + fs;
       if (S.wxOn) {
         this.text('WX', W - padR, ry, COL.green, fs, 'right', 'alphabetic', true);
         ry += fs * 1.2;

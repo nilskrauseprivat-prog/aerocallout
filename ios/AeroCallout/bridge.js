@@ -9,6 +9,11 @@
   if (window.__acBridge) return;
   window.__acBridge = true;
   window.AC_IOS = true;
+  // html.ios: layout rules for the iPhone screen (rounded corners, Dynamic Island, home indicator)
+  (function mark() {
+    if (document.documentElement) document.documentElement.classList.add('ios');
+    else document.addEventListener('readystatechange', mark, { once: true });
+  })();
 
   function call(obj, method, args) {
     try {

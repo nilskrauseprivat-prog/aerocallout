@@ -464,8 +464,13 @@ OVERLAY_JS = r'''
     st.textContent = `:root{--sim-sat:${i.t}px;--sim-sab:${i.b}px;--sim-sal:${i.l}px;--sim-sar:${i.r}px}`;
     let o = document.getElementById('__simIsland');
     if (!o) {
+      // display shape of the iPhone 15: rounded screen corners (radius 55 pt)
+      const f = document.createElement('div'); f.id = '__simFrame';
+      f.style.cssText = 'position:fixed;inset:0;z-index:2147483646;border-radius:55px;box-shadow:0 0 0 60px #000;pointer-events:none';
+      document.documentElement.appendChild(f);
       o = document.createElement('div'); o.id = '__simIsland';
-      o.style.cssText = 'position:fixed;z-index:2147483647;background:#000;border-radius:20px;pointer-events:none;outline:1px solid rgba(255,80,80,.7)';
+      // black like the real one; the faint edge only shows where it is on black content
+      o.style.cssText = 'position:fixed;z-index:2147483647;background:#000;border-radius:20px;pointer-events:none;box-shadow:0 0 0 1px rgba(255,255,255,.18)';
       document.documentElement.appendChild(o);
       const h = document.createElement('div'); h.id = '__simHome';
       h.style.cssText = 'position:fixed;z-index:2147483647;height:5px;border-radius:3px;background:rgba(255,255,255,.85);pointer-events:none;left:50%%;transform:translateX(-50%%)';
@@ -555,7 +560,18 @@ async def selftest(app, page, secs):
     await asyncio.sleep(8)
     await app.set_background(False)
     await asyncio.sleep(2)
+    log('state', json.dumps(await page.evaluate('''() => ({ vv: [visualViewport.scale, visualViewport.offsetTop, visualViewport.height],
+        scrollY, inner: [innerWidth, innerHeight], doc: document.documentElement.scrollHeight,
+        island: document.getElementById('__simIsland') && document.getElementById('__simIsland').getBoundingClientRect().top,
+        ios: document.documentElement.className, insT: AC.Display.insT, canvasTop: AC.Display.c.getBoundingClientRect().top })''')))
     await app.shot('05-resumed')
+    await click_text('Alle Tasten')
+    await asyncio.sleep(1.5)
+    await app.shot('06-all-keys')
+    await app.set_orientation(True)
+    await asyncio.sleep(2)
+    await app.shot('07-landscape-all-keys')
+    await app.set_orientation(False)
 
 
 async def main():

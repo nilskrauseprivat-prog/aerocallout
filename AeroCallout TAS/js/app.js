@@ -127,6 +127,19 @@
         });
       }
       D.insL = L; D.insR = R;
+      // iPhone: the radar may reach up beside the Dynamic Island / notch. Its top edge texts start low enough
+      // to clear the rounded screen corners (safe area top = 0 on other devices -> no change).
+      let T = 0;
+      if (!land && D.c) {
+        if (!this._safeProbe) {
+          this._safeProbe = document.createElement('div');
+          this._safeProbe.className = 'safe-probe';
+          document.body.appendChild(this._safeProbe);
+        }
+        const sat = parseFloat(getComputedStyle(this._safeProbe).paddingTop) || 0;
+        if (sat > 0) T = Math.max(0, sat - 24 - D.c.getBoundingClientRect().top);
+      }
+      D.insT = T;
     },
 
     /** Weather picture is hidden while auto range is active or an alert / advisory is up (traffic, terrain, obstacle). */
